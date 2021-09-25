@@ -1,6 +1,7 @@
 VERSION := 0.0.1
 BUILD := $(shell git rev-parse --short HEAD)
 PROJECTNAME := web
+output := $(ROOT)/bin/$(PROJECTNAME)
 
-dev:
-	air -c air.toml
+build:
+	go build -o $(output)

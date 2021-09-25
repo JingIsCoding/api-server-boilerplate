@@ -1,0 +1,83 @@
+version: "3.7"
+
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: ./Dockerfile
+    target: dev
+  image: pos-api-dev:1.1.0
+  tmpfs:
+    - /tmp
+  environment: &environment
+    ENV: ${ENV}
+    SERVER_SERVICE_NAME: web
+    SERVER_HMAC_SECRET: 123456
+    SERVER_PORT: 8081
+    SERVER_DOMAIN: localhost
+    DATABASE_TYPE: postgres
+    DATABASE_URL: postgres://postgres:postgres@postgres:5432/local_development?sslmode=disable
+    REDIS_NAME: master
+    REDIS_HOST: localhost
+    REDIS_PORT: 6379
+    REDIS_URL: redis://master@localhost:6379
+    REDIS_MAX_ACTIVE: 10
+    REDIS_MAX_IDLE: 10
+    REDIS_IDEL_TIMEOUT: 60
+    LOG_LEVEL: info
+  volumes:
+    - .:/usr/src/app/:cached
+  depends_on:
+    - postgres
+    - redis
+
+services:
+  web:
+    <<: *backend
+    command: make web-dev
+    environment:
+      <<: *environment
+    ports:
+     - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrate:
+    <<: *backend
+    command: ./bin/migrate -command=up -version=1
+    environment:
+      <<: *environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis
+
+  postgres:
+    image: postgres:12.1
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./log:/root/log:cached
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=local_development
+    ports:
+      - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - 6379
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:
+  postgres:

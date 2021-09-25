@@ -1,0 +1,12 @@
+# In .dockerignore
+.git
+.gitlab-ci.yml
+.dockerignore
+dist
+Dockerfile
+docker-compose.yml
+docs
+test
+
+.env
+.env.local
