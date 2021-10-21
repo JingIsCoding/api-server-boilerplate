@@ -61,6 +61,12 @@ We are using [golang-migrate](https://github.com/golang-migrate/migrate) to mana
 make migrate-create name=alter_user_table_add_image_url
 ```
 
+## Handling context
+You might find code looks like throughout the codebase.
+```
+type AuthServiceWithContext func(ctx context.Context) AuthService
+```
+It is basically a factory function that return an actually object that concerns with the context. And you might ask why couldn't we pass context object as an argument to all the functions, the reason is really about not be repetitive and keep the interface clean by removing context
 
 ## Project layout
 #### cmd
