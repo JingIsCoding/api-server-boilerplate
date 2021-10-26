@@ -67,18 +67,3 @@ You might find code looks like throughout the codebase.
 type AuthServiceWithContext func(ctx context.Context) AuthService
 ```
 It is basically a factory function that return an actually object that concerns with the context. And you might ask why couldn't we pass context object as an argument to all the functions, the reason is really about not be repetitive and keep the interface clean by removing context
-
-## Project layout
-#### cmd
-All the commands that can be built into binary from the rest of the code base, for example, we have the web command that serves the http request, and a worker command that will be running somewhere else that can handle asynchronous tasks.
-#### config
-#### db
-#### exceptions
-#### logger
-#### mock
-#### model
-#### queue
-#### repo
-#### restful
-#### scripts
-#### service

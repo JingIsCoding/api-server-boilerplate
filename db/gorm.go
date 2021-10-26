@@ -47,10 +47,7 @@ func NewDatabase() DatabaseWithCtx {
 		}
 	})
 	return func(ctx context.Context) Database {
-		return &GormDatabase{
-			db:  db,
-			ctx: ctx,
-		}
+		return newGormDatabase(ctx, db)
 	}
 }
 
@@ -58,6 +55,10 @@ func (g *GormDatabase) WithTimeout(function func(Database) Database, timeout tim
 	timeoutCtx, cancelFunc := context.WithTimeout(g.ctx, timeout)
 	defer cancelFunc()
 	return function(newGormDatabase(timeoutCtx, g.db))
+}
+
+func (g *GormDatabase) WithContext(ctx context.Context) Database {
+	return newGormDatabase(ctx, g.db)
 }
 
 // Begin return a new instance of Database
@@ -86,9 +87,9 @@ func (g *GormDatabase) Debug() Database {
 }
 
 func (g *GormDatabase) Scopes(funcs ...func(Database) Database) Database {
-	var db Database
+	db := g
 	for _, f := range funcs {
-		db = f(g).(*GormDatabase)
+		db = f(db).(*GormDatabase)
 	}
 	return db
 }
